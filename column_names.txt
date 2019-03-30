@@ -1,0 +1,8 @@
+['subject_id',
+    'jitter_local','jitter_local_absolute','jitter_rap','jitter_ppq5','jitter_ddp', 
+'shimmer_local','Shimmer_local_dB','Shimmer_apq3','shimmer_apq5', 'shimmer_apq11','shimmer_dda', 
+'ac','nth','htn', 
+'median_pitch', 'mean_pitch','standard_deviation', 'minimum_pitch', 'maximum_pitch', 
+'number_of_pulses','number_of_periods', 'mean_period', 'standard_deviation_of_period', 
+ 'fraction_of_locally_unvoiced_frames', 'number_of_voice_breaks' ,'degree_of_voice_breaks',
+          'UPDRS', 'class_information']
