@@ -17,8 +17,8 @@ df = pd.read_csv('Parkinson_Multiple_Sound_Recording/full_data.csv', sep=",", he
 features = df.iloc[:,0:-1]
 target = df.iloc[:,-1]
 
-print(features)
-print(target)
+#print(features)
+#print(target)
 
 X_train, X_test, y_train, y_test = train_test_split(features, target, 
                                                     test_size = 0.2, 
@@ -34,30 +34,35 @@ knn.fit(X_train,y_train)
 # Print the accuracy
 print(knn.score(X_test, y_test))
 
-tdf = pd.read_csv('./processed_results.csv');
 
-pred = knn.predict(tdf)
-prob = knn.predict_proba(tdf)
+def classify(file):
+    tdf = pd.read_csv(file);
+    
+    #print(tdf.iloc[0,15]);
+    
+    pred = knn.predict(tdf)
+    prob = knn.predict_proba(tdf)
+    
+    if pred == 0:
+        res = "have parkinsons"
+    else:
+        res = "not have parkinsons"
+    
+#    print(knn.predict(tdf));
+#    print(knn.predict_proba(tdf));
+    return (prob, res)
 
-if pred == 1:
-    res = "have parkinsons"
-else:
-    res = "not have parkinsons"
-
-print(knn.predict(tdf));
-print(knn.predict_proba(tdf));
-
-
-client = nexmo.Client(key='21304330', secret='spKzQR0NWIKOvYUY')
-response = client.send_message({'from': 'CallMe_Parkinson', 'to': '+447979488684', 
-                                'text': 'Patient X is %s percent likely to %s' % (prob, res)})
-
-response = response['messages'][0]
-
-if response['status'] == '0':
-  print('Sent message', response['message-id'])
-
-  print('Remaining balance is', response['remaining-balance'])
-else:
-  print('Error:', response['error-text'])
+def sendSMS(prob, res):
+    client = nexmo.Client(key='21304330', secret='spKzQR0NWIKOvYUY')
+    response = client.send_message({'from': 'CMP', 'to': '+447979488684', 
+                                    'text': 'Patient X is %.0f percent likely to %s' % (max(prob[0])*100, res)})
+    
+    response = response['messages'][0]
+    
+    if response['status'] == '0':
+      print('Sent message', response['message-id'])
+    
+      print('Remaining balance is', response['remaining-balance'])
+    else:
+      print('Error:', response['error-text'])
   

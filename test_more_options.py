@@ -13,6 +13,8 @@ import parselmouth
 import urllib.request
 
 from parselmouth.praat import call
+from ml2 import classify
+from ml2 import sendSMS
 
 urllib.request.urlretrieve('https://parkinsons.nodered.nexmodev.com/audio', './Sounds/audio.mp3')
 
@@ -29,7 +31,7 @@ def measurePitch(voiceID, f0min, f0max, unit):
     hnr = call(harmonicity, "Get mean", 0, 0)
     pointProcess = call(sound, "To PointProcess (periodic, cc)", f0min, f0max)
     # Jitter
-    localJitter = call(pointProcess, "Get jitter (local)", 0, 0, 0.0001, 0.02, 1.3)
+    localJitter = call(pointProcess, "Get jitter (local)", 0, 0, 0.0001, 0.02, 1.3)*100
     localabsoluteJitter = call(pointProcess, "Get jitter (local, absolute)", 0, 0, 0.0001, 0.02, 1.3)
     rapJitter = call(pointProcess, "Get jitter (rap)", 0, 0, 0.0001, 0.02, 1.3)
     ppq5Jitter = call(pointProcess, "Get jitter (ppq5)", 0, 0, 0.0001, 0.02, 1.3)
@@ -45,9 +47,9 @@ def measurePitch(voiceID, f0min, f0max, unit):
     num_pulses = parselmouth.praat.call(pointProcess, "Get number of points")
     num_period = parselmouth.praat.call(pointProcess, "Get number of periods", 0.0, 0.0, 0.0001, 0.02, 1.3)
     
-    print(num_pulses)
-    print(num_period)
-    print(median_pitch)
+#    print(num_pulses)
+#    print(num_period)
+#    print(median_pitch)
 
     return meanF0, stdevF0, hnr, localJitter, localabsoluteJitter, rapJitter, ppq5Jitter, ddpJitter, localShimmer, localdbShimmer, apq3Shimmer, aqpq5Shimmer, apq11Shimmer, ddaShimmer, num_pulses, num_period, median_pitch
 
@@ -96,7 +98,7 @@ for wave_file in glob.glob("Sounds/*.mp3"):
     ddpJitter_list.append(ddpJitter)
     aqpq5Shimmer_list.append(aqpq5Shimmer) 
     
-    print(wave_file)
+#    print(wave_file)
     
 df = pd.DataFrame(np.column_stack([localJitter_list, localabsoluteJitter_list, 
                                    rapJitter_list, ppq5Jitter_list, ddpJitter_list, 
@@ -115,3 +117,9 @@ df = pd.DataFrame(np.column_stack([localJitter_list, localabsoluteJitter_list,
 
 # Write out the updated dataframe
 df.to_csv("processed_results.csv", index=False)
+
+# Classify phone call
+prob, res = classify("./processed_results.csv")
+
+# Send results to doctor
+sendSMS(prob,res)
